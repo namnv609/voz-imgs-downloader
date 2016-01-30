@@ -16,10 +16,14 @@
 * start: Start page
 * end: End page
 * dir: Target directory to save downloaded files
-
+* --no-download: (Optional) Skip download and save links to file in target directory
 
 ### Example
 
-``./voz-downloader -h``
+```
+./voz-downloader -h
 
-``./voz-downloader 2065093 1 2 ~/Desktop/imgs/``
+./voz-downloader 2065093 1 2 ~/Desktop/imgs/
+
+./voz-downloader 2065093 1 2 ~/Desktop/imgs/ --no-download
+```

@@ -5,8 +5,11 @@ import re, argparse, urllib, os, requests
 
 requests.packages.urllib3.disable_warnings()
 
-def downloadImage(threadID, targetDir, startPage = 1, endPage = 1):
-    for page in xrange(startPage, endPage):
+def downloadImage(threadID, targetDir, download, startPage = 1, endPage = 1):
+    if download == False:
+        f = open('%s/list-%d-%d-%d' % (targetDir, threadID, startPage, endPage), 'w')
+
+    for page in xrange(startPage, (endPage + 1)):
         webUrl = 'https://vozforums.com/showthread.php?t=%d&page=%d' % (threadID, page)
         request = requests.get(webUrl)
         if request.status_code == 200:
@@ -19,7 +22,10 @@ def downloadImage(threadID, targetDir, startPage = 1, endPage = 1):
             if len(images):
                 for index, image in enumerate(images):
                     try:
-                        urllib.urlretrieve(image, '%s/%s' % (targetDir, os.path.basename(image)))
+                        if download == False:
+                            f.write('%s\n' % image)
+                        else:
+                            urllib.urlretrieve(image, '%s/%s' % (targetDir, os.path.basename(image)))
                         print 'Dowloaded (%d/%d): %s' % ((index+1), len(images), image)
                     except:
                         pass
@@ -32,6 +38,7 @@ def downloadImage(threadID, targetDir, startPage = 1, endPage = 1):
 
 def imageExtractor(images):
     imageList = list()
+
     if len(images):
         for image in images:
             if re.match('^http', image['src']):
@@ -43,10 +50,12 @@ parser = argparse.ArgumentParser(description='vOz Images Downloader')
 parser.add_argument('id', help='Thread ID', type=int)
 parser.add_argument('start', help='Start page', type=int)
 parser.add_argument('end', help='End page', type=int)
-parser.add_argument('dir', help='Target directory to save downloaded file', type=str)
+parser.add_argument('dir', help='Target directory to save downloaded files', type=str)
+parser.add_argument('--no-download', help='Skip download and save links to file in target directory', dest='download', action='store_false')
+parser.set_defaults(download=True)
 
 args = parser.parse_args()
 
-downloadImage(args.id, args.dir, args.start, args.end)
+downloadImage(args.id, args.dir, args.download, args.start, args.end)
 
 
