@@ -1,0 +1,52 @@
+#!/usr/bin/env python
+
+from bs4 import BeautifulSoup
+import re, argparse, urllib, os, requests
+
+requests.packages.urllib3.disable_warnings()
+
+def downloadImage(threadID, targetDir, startPage = 1, endPage = 1):
+    for page in xrange(startPage, endPage):
+        webUrl = 'https://vozforums.com/showthread.php?t=%d&page=%d' % (threadID, page)
+        request = requests.get(webUrl)
+        if request.status_code == 200:
+            print '----------Page %d----------' % page
+
+            pageDOM = BeautifulSoup(request.text, 'html5lib')
+            imgs = pageDOM.select('.voz-post-message img')
+            images = imageExtractor(imgs)
+
+            if len(images):
+                for index, image in enumerate(images):
+                    try:
+                        urllib.urlretrieve(image, '%s/%s' % (targetDir, os.path.basename(image)))
+                        print 'Dowloaded (%d/%d): %s' % ((index+1), len(images), image)
+                    except:
+                        pass
+            else:
+                print 'Image(s) not found!!'
+
+            print '----------End page %d----------' % page
+        else:
+            print 'Occurred error %s' % request.status_code
+
+def imageExtractor(images):
+    imageList = list()
+    if len(images):
+        for image in images:
+            if re.match('^http', image['src']):
+                imageList.append(image['src'])
+
+    return imageList
+
+parser = argparse.ArgumentParser(description='vOz Images Downloader')
+parser.add_argument('id', help='Thread ID', type=int)
+parser.add_argument('start', help='Start page', type=int)
+parser.add_argument('end', help='End page', type=int)
+parser.add_argument('dir', help='Target directory to save downloaded file', type=str)
+
+args = parser.parse_args()
+
+downloadImage(args.id, args.dir, args.start, args.end)
+
+
