@@ -8,7 +8,6 @@ setup(
     author='NamNV609',
     author_email='namnv609@gmail.com',
     license='MIT',
-    packages=['voz-images-downloader'],
     install_requires=[
         'beautifulsoup4',
         'requests',
